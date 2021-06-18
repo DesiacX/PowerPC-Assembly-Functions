@@ -750,20 +750,21 @@ void SaveRegisters(vector<int> FPRegs)
 {
 	FPPushRecords = FPRegs;
 	int stackSize = 29 * 4 + FPRegs.size() * 8 + 8 + 8;
-	STW(0, 1, -4);
-	MFLR(0);
-	STW(0, 1, 4);
-	MFCTR(0);
-	STW(0, 1, -8);
+	STWU(1, 1, -stackSize)
 
-	int offset = -8;
+	STW(0, 1, 0x8);
+	MFLR(0);
+	STW(0, 1, stackSize+0x4);
+	MFCTR(0);
+	STW(0, 1, 0xC);
+	STMW(3, 1, 0x10);
+
+	int offset = 29*4 + 8 + 8;
 	for (int x : FPRegs) {
-		offset -= 8;
+		offset += 8;
 		STFD(x, 1, offset);
 	}
 
-	STWU(1, 1, -stackSize);
-	STMW(3, 1, 8);
 }
 
 void SaveRegisters(int NumFPRegs)
@@ -777,20 +778,23 @@ void RestoreRegisters()
 {
 	int stackSize = 29 * 4 + FPPushRecords.size() * 8 + 8 + 8;
 
-	LMW(3, 1, 8);
-	ADDI(1, 1, stackSize);
 
-	int offset = -8;
+	int offset = 29*4+0x8+0x8;
 	for (int x : FPPushRecords) {
-		offset -= 8;
+		offset += 8;
 		LFD(x, 1, offset);
 	}
 	
-	LWZ(0, 1, -8);
-	MTCTR(0);
-	LWZ(0, 1, 4);
+	LWZ(0, 1, stackSize+0x4);
 	MTLR(0);
-	LWZ(0, 1, -4);
+	LWZ(0, 1, 0xC);
+	MTCTR(0);
+	
+	LWZ(0, 1, 0x8);
+	LMW(3, 1, 0x10);
+	
+	
+	ADDI(1, 1, stackSize);
 }
 
 void SetRegs(int StartReg, vector<int> values)
