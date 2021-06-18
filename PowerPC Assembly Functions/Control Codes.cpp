@@ -660,7 +660,7 @@ void AddNewCharacterBuffer()
 		ADDI(reg2, EntityReg, 0x34);
 		RLWINM(reg1, reg1, 3, 0, 31); //*=8
 		LWZX(3, reg2, reg1);
-		SetRegister(IsPopoReg, 0x10);
+		SetRegister(IsPopoReg, 0x2);
 
 		int Start = GetNextLabel();
 		Label(Start);
@@ -751,7 +751,7 @@ void AddNewCharacterBuffer()
 			CreateDIBuffer(CharacterBufferReg, reg2, reg3, reg4);
 		}
 
-		LWZ(reg1, EntityReg, 0x5C);
+		LWB(reg1, EntityReg, 0xE);
 		If(reg1, EQUAL, IsPopoReg); {
 			//is ice climbers, and first run through
 			LWZ(3, EntityReg, 0x3C); //get nana module
